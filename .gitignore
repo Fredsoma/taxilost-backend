@@ -1,0 +1,31 @@
+# Node dependencies
+node_modules/
+
+# Environment variables
+.env
+*.env
+
+# Uploaded files folder (if any)
+uploads/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+*.log
+
+# Build/dist folders (if you ever compile/transpile)
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/editor files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
