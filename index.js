@@ -1,18 +1,36 @@
-// backend/index.js
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const User = require('./models/User');
+const bcrypt = require('bcryptjs'); 
 
-const authRoutes = require('./routes/auth');
+
+
 const taxiRoutes = require('./routes/taxi');
 const passengerRoutes = require('./routes/passenger');
 const registerTaxiRoute = require('./routes/registerTaxi');
 const lostReportsRoute = require('./routes/lostReports');
+const authRoutes = require('./routes/authRoutes');
+const taxiDriverRoutes = require('./routes/taxiDriverRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+
+
+
+app.use('/auth', authRoutes);
+
+app.use('/api/taxidriver', require('./routes/taxiDriverRoutes'));
+
+app.use('/api/client', require('./routes/client'));
+
+
+app.use('/api/admin', adminRoutes);
 
 // **Connect to MongoDB**
 mongoose
@@ -25,8 +43,7 @@ mongoose
 
 // **Routes**
 
-// 1) Authentication: register/login driver
-app.use('/api/auth', authRoutes);
+
 
 // 2) Taxi registration: public endpoint
 //    POST /api/register-taxi

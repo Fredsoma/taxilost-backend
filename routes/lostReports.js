@@ -1,8 +1,9 @@
-// backend/routes/lostReports.js
+
 const express = require('express');
 const router = express.Router();
 const LostReport = require('../models/LostReport');
 const Taxi = require('../models/Taxi');
+const authMiddleware = require('../middleware/authMiddleware');
 
 // GET /api/lost-reports
 // Returns all lost‐item reports (most recent first)
@@ -16,35 +17,31 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST /api/lost-reports
-// { taxiId, contact, itemName }
-router.post('/', async (req, res) => {
-  const { taxiId, name, contact, itemName } = req.body;
-  if (!taxiId || !name || !contact || !itemName) {
-    return res.status(400).json({ error: 'All fields are required.' });
+// POST /api/client/lost-report
+router.post('/lost-report', authMiddleware, async (req, res) => {
+  const { description, taxiId } = req.body;
+
+  if (!description) {
+    return res.status(400).json({ error: 'Description is required.' });
   }
 
   try {
-    // Look up taxi in the Taxi collection
-    const taxi = await Taxi.findOne({ taxiId });
-    const matchedDriver = taxi
-      ? {
-          name: taxi.driverName,
-          phone: taxi.phone,
-          carPlate: taxi.carPlate,
-          taxiId: taxi.taxiId
-        }
-      : null;
+    const userId = req.user.userId; // from auth middleware
 
-    // Save new lost report
-    const newReport = new LostReport({ taxiId, name, contact, itemName, matchedDriver });
-    const saved = await newReport.save();
+    const newReport = new LostReport({
+      user: userId,
+      description,
+      taxiId,
+    });
 
-    return res.status(201).json({ matchedDriver });
+    await newReport.save();
+
+    return res.status(201).json(newReport);
   } catch (err) {
     console.error('Error saving lost report:', err);
     return res.status(500).json({ error: 'Server error. Please try again.' });
   }
 });
+
 
 module.exports = router;
