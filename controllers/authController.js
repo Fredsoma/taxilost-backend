@@ -39,7 +39,9 @@ const register = async (req, res) => {
     // 1) Check for existing email
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ error: 'Email already in use' });
+      return res
+        .status(400)
+        .json({ errors: ['Email already in use'] });
     }
 
     // 2) Hash password
@@ -51,7 +53,7 @@ const register = async (req, res) => {
       fullName,
       email,
       password: hashedPassword,
-      phoneNumber,             
+      phoneNumber,
     };
 
     // If taxi driver, attach those fields
@@ -73,20 +75,21 @@ const register = async (req, res) => {
       { expiresIn: '1d' }
     );
 
-   return res.status(201).json({
-  token,
-  role: newUser.role,
-  taxiId: newUser.taxiId || null,
-  fullName: newUser.fullName,
-  email: newUser.email,
-});
+    return res.status(201).json({
+      token,
+      role: newUser.role,
+      taxiId: newUser.taxiId || null,
+      fullName: newUser.fullName,
+      email: newUser.email,
+    });
 
   } catch (err) {
     console.error('Registration error:', err);
-    return res.status(500).json({ error: 'Server error during registration' });
+    return res
+      .status(500)
+      .json({ errors: ['Server error during registration'] });
   }
 };
-
 
 
 
@@ -104,20 +107,27 @@ const login = async (req, res) => {
     const { email, password, role } = req.body;
     // 1) Find user by email
     const user = await User.findOne({ email, role });
-    if (!user) {
-      return res.status(400).json({ error: 'Invalid credentials  or role mismatch' });
-    }
+   if (!user) {
+  return res
+    .status(400)
+    .json({ errors: ['Invalid credentials or role mismatch'] });
+}
 
      // 🚫 Ban check
-    if (user.isBanned) {
-      return res.status(403).json({ error: 'Your account has been banned.' });
-    }
+   if (user.isBanned) {
+  return res
+    .status(403)
+    .json({ errors: ['Your account has been banned.'] });
+}
 
     // 2) Compare password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ error: 'Invalid credentials' });
-    }
+   if (!isMatch) {
+  return res
+    .status(400)
+    .json({ errors: ['Invalid credentials'] });
+}
+
 
     // 3) Sign JWT with role
     const token = jwt.sign(
@@ -129,7 +139,9 @@ const login = async (req, res) => {
     return res.json({ token, role: user.role });
   } catch (err) {
     console.error('Login error:', err);
-    return res.status(500).json({ error: 'Server error during login' });
+   return res
+  .status(500)
+  .json({ errors: ['Server error during login'] });
   }
 };
 
